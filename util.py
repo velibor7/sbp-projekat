@@ -1,6 +1,8 @@
 import csv
+import ast
 import pymongo
 from datetime import datetime
+from dateutil import parser
 
 
 def add_artists_to_db(file_name = "data/artists.csv", url = 'mongodb://localhost:27017/', db_name = 'sbp'):
@@ -22,7 +24,7 @@ def get_artist(row) -> dict:
     return {
         '_id': row['id'],
         'followers': int(float(row['followers'])) if row['followers'] else 0,
-        'genres': list(row['genres']),
+        'genres': ast.literal_eval(row['genres']),
         'name': row['name'],
         'popularity': int(row['popularity']),
     }
@@ -47,10 +49,11 @@ def get_track(row) -> dict:
         'name': row['name'],
         'popularity': int(row['popularity']),
         'duration_ms': int(row['duration_ms']),
-        'explicit': bool(row['explicit']),
-        'artists': list(row['artists']),
-        'id_artists': list(row['id_artists']),
-        'release_date': row['release_date'],
+        # 'explicit': bool(row['explicit']),
+        'explicit': False if int(row['explicit']) == 0 else True,
+        'artists': ast.literal_eval(row['artists']),
+        'id_artists': ast.literal_eval(row['id_artists']),
+        'release_date': parser.parse(row['release_date']+"-01-01" if len(row['release_date']) < 5 else row['release_date']),
         'danceability': float(row['danceability']),
         'energy': float(row['energy']),
         'key': int(row['key']),
